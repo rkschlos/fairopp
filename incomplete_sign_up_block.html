@@ -1,0 +1,35 @@
+<!--finish sign up block-->
+
+
+<style>
+    p {font-family: Poppins;}
+    .btn-primary {background-color: #2BB99D;
+      border: none;
+  }
+    
+</style>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const isFullySignedUp = !!window.logged_in_user["Finished Signup"] == 1;
+
+if (!isFullySignedUp) {
+    Swal.fire({
+        title: 'Incomplete Sign-up',
+        text: 'It looks like you need to finish signing up',
+        icon: 'error',
+        confirmButtonText: 'Take me there',
+        didClose: () => {
+          window.location.href = "sign-up-additional-info";
+        }
+    });
+}
+</script>
+<div class="pt-5 d-flex flex-column justify-content-center align-items-center">
+    <p class="h4 pb-4">
+        It looks like you need to finish sign-up!
+    </p>
+    <div class="btn btn-primary pe-auto" onclick="window.location.href = 'sign-up-additional-info'">
+        Take me there
+    </div>
+</div>

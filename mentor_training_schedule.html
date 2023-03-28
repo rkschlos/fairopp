@@ -1,0 +1,17 @@
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const mentorStatus = window.logged_in_user["Mentor Status"];
+const hasNotReadStuff = mentorStatus == "BLANK" || mentorStatus == "Emailed";
+
+if (hasNotReadStuff) {
+    Swal.fire({
+        title: 'You need to read the mentor handbook',
+        text: "It looks like you need to finish reading the handbook. On the next page, be sure to mark that you've read the guide once finished.",
+        icon: 'error',
+        confirmButtonText: 'Take me there',
+        didClose: () => {
+          window.location.href = "mentor-training-materials";
+        }
+    });
+}
+</script>

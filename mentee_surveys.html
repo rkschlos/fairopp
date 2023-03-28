@@ -1,0 +1,360 @@
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/gh/justKD/AirpuckJS@master/airpuck.min.js"></script>
+<script>
+function getRecordId() {
+    //return 'recfLjwZhjUySWlo7';
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return urlParams.get('recordId');
+}
+
+async function getCall() {
+    return new Promise((resolve, reject) => {
+        try {
+            const callsTable = new Airpuck.Table({
+                name: "Mentorship Calls",
+                baseID: "appKUVt8K5fU6BOOJ",
+                apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+            }, _ => {
+                const recordId = getRecordId();
+                const row = callsTable.getRecordByID(recordId);
+                resolve([row, callsTable]);
+            });
+        } catch {
+            reject();
+        }
+    });
+}
+
+async function getMenteeEmail() {
+    const [call, _] = await getCall();
+    return call.fields["Mentee Email"][0];
+}
+
+async function setColumns(menteeEmail, dict) {
+    const successCallback = async () => {
+        Swal.fire({
+            title: 'Success!',
+            text: "You're response has been recorded.",
+            icon: 'success',
+            didClose: () => { 
+                window.location = "mentee-calls" 
+            },
+        });
+        const [call, table] = await getCall();
+        call.fields["Has Survey"] = true;
+        const setUndef = ["UID", "Link Display Text", "Display Session Activities", "Display Homework Assigned", "Needs Survey", "Title",
+        "Mentor First Name", "Mentor Email", "Mentor Meeting Link", "Mentor Profile Pic",
+        "Mentee Email", "Mentee First Name", "Mentee Grade", "Mentee Pronouns", "Mentee Status", "Mentee Profile Pic"];
+        for (ix in setUndef) {
+            call.fields[setUndef[ix]] = undefined;
+        }
+        table.update(call, () => null);
+    }
+
+    return new Promise((resolve) => {
+        const surveyTable = new Airpuck.Table({
+            name: "Mentee Surveys",
+            baseID: "appKUVt8K5fU6BOOJ",
+            apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+        }, _ => {
+            const records = surveyTable.getRecordsByField("Email", menteeEmail);
+            if (records.length > 0) {
+                // Update the existing record
+                const record = records[0];
+                for (const [key, value] of Object.entries(dict)) {
+                    record.fields[key] = value;
+                }
+                surveyTable.update(record);
+                successCallback();
+            } else {
+                // Create a new record
+                const record = new surveyTable.record();
+                record.fields = {};
+                record.fields["Email"] = menteeEmail;
+                for (const [key, value] of Object.entries(dict)) {
+                    record.fields[key] = value;
+                }
+                surveyTable.add(record, successCallback);
+            }
+            resolve();
+        });
+    });
+}
+
+async function submitStandardized() {
+    const menteeEmail = await getMenteeEmail();
+    const knowledge = document.getElementById('standard_knowledge').value;
+    const confidence = document.getElementById('standard_confidence').value;
+	await setColumns(menteeEmail, {
+	    "Standardized Knowledge": parseInt(knowledge),
+	    "Standardized Confidence": parseInt(confidence),
+	});
+	
+}
+
+async function submitEssay() {
+    const menteeEmail = await getMenteeEmail();
+    const knowledge = document.getElementById('essay_knowledge').value;
+    const confidence = document.getElementById('essay_confidence').value;
+	await setColumns(menteeEmail, {
+	    "Essay Knowledge": parseInt(knowledge),
+	    "Essay Confidence": parseInt(confidence),
+	});
+}
+
+async function submitFinaid() {
+    const menteeEmail = await getMenteeEmail();
+    const importance = document.getElementById('finaid_importance').value;
+    const fafsa = document.getElementById('fafsa').value;
+    const finplan = document.getElementById('finplan').value;
+    const finaid_knowledge = document.getElementById('finaid_knowledge').value;
+    const find_scholarships = document.getElementById('find_scholarships').value;
+    const loans = document.getElementById('loans').value;
+	await setColumns(menteeEmail, {
+	    "Finaid Importance": parseInt(importance),
+	    "FAFSA Completed": fafsa == "on",
+	    "Thought About Finplan": parseInt(finplan),
+	    "Scholarship Knowledge": parseInt(finaid_knowledge),
+	    "Scholarship Confidence": parseInt(find_scholarships),
+	    "Loan Confidence": parseInt(loans),
+	});
+}
+
+async function submitInterview() {
+    const menteeEmail = await getMenteeEmail();
+    const knowledge = document.getElementById('interview_knowledge').value;
+    const confidence = document.getElementById('interview_confidence').value;
+	await setColumns(menteeEmail, {
+	    "Interview Knowledge": parseInt(knowledge),
+	    "Interview Confidence": parseInt(confidence),
+	});
+}
+
+async function submitLife() {
+    const menteeEmail = await getMenteeEmail();
+    const confidence = document.getElementById('life_confidence').value;
+	await setColumns(menteeEmail, {
+	    "College Life Confidence": parseInt(confidence),
+	});
+}
+
+window.onload = async function () {
+    if (sessionStorage.getItem("survey_load") == "true") {
+        return;
+    }
+    sessionStorage.setItem("survey_load", "true");
+    
+    document.getElementById('standardized').style.display = "none";
+    document.getElementById('essay').style.display = "none";
+    document.getElementById('finaid').style.display = "none";
+    document.getElementById('interview').style.display = "none";
+    document.getElementById('college_life').style.display = "none";
+    
+    const [call, _] = await getCall();
+    const types = call.fields["Call Type"];
+    
+    if (types.includes("Standardized Tests")) {
+        document.getElementById('standardized').style.display = "block";
+        document.getElementById('standardized').style.opacity = "100%";
+    }
+    
+    if (types.includes("College Essays")) {
+        document.getElementById('essay').style.display = "block";
+        document.getElementById('essay').style.opacity = "100%";
+    }
+    
+    if (types.includes("Financial Aid/Scholarships")) {
+        document.getElementById('finaid').style.display = "block";
+        document.getElementById('finaid').style.opacity = "100%";
+    }
+    
+    if (types.includes("Interviews & Post-Submission")) {
+        document.getElementById('interview').style.display = "block";
+        document.getElementById('interview').style.opacity = "100%";
+    }
+    
+    if (types.includes("Preparation for College Life")) {
+        document.getElementById('college_life').style.display = "block";
+        document.getElementById('college_life').style.opacity = "100%";
+    }
+    
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('recordId')) {
+        params.set('recordId', 'recfLjwZhjUySWlo7');
+        window.location.search = params.toString();
+    }
+    
+}
+
+</script>
+
+<div class="question" id="standardized">
+    <h1 style="text-align: center">Standardized Tests</h1>
+    <form id="standardized_form">
+    	<label for="standard_knowledge">My knowledge about standardized tests (i.e., the ACT and SAT) is...</label>
+    	<input type="range" min="1" max="5" name="standard_knowledge" id="standard_knowledge" required>
+    	<label for="standard_confidence">My confidence in my ability to complete standardized tests is...</label>
+    	<input type="range" min="1" max="5" name="standard_confidence" id="standard_confidence" required>
+    	<button type="button" onclick="submitStandardized()">Submit</button>
+    </form>
+</div>
+
+<div class="question" id="essay">
+    <h1 style="text-align: center">The College Essay</h1>
+    <form id="essayForm">
+    	<label for="essay_knowledge">My knowledge about writing college essays is...</label>
+    	<input type="range" min="1" max="5" name="essay_knowledge" id="essay_knowledge" required>
+    	<label for="essay_confidence">My confidence in my ability to write my college essays is...</label>
+    	<input type="range" min="1" max="5" name="essay_confidence" id="essay_confidence" required>
+    	<button type="button" onclick="submitEssay()">Submit</button>
+    </form>
+</div>
+
+<div class="question" id="finaid">
+    <h1 style="text-align: center">Financial Aid and FAFSA</h1>
+    <form id="aidForm">
+    	<label for="finaid_importance">My understanding of the importance of filling out the Free Application for Federal Student Aid (FAFSA) form is…</label>
+    	<input type="range" min="1" max="5" name="finaid_importance" id="finaid_importance" required>
+    	<label for="fafsa">I have completed the FAFSA.
+    	    <input type="checkbox" name="fafsa" id="fafsa">
+    	</label>
+    	<label for="finplan">I have thought about my financial plan for getting through college.</label>
+    	<input type="range" min="1" max="5" name="finplan" id="finplan" required>
+    	<label for="finaid_knowledge">My knowledge about college scholarships (both needs-based and merit) is…</label>
+    	<input type="range" min="1" max="5" name="finaid_knowledge" id="finaid_knowledge" required>
+    	<label for="find_scholarships">My confidence in my strategy for finding and applying to scholarships is…</label>
+    	<input type="range" min="1" max="5" name="find_scholarships" id="find_scholarships" required>
+    	<label for="loans">My confidence in my ability to find reliable information about student loans is…</label>
+    	<input type="range" min="1" max="5" name="loans" id="loans" required>
+    	<button type="button" onclick="submitFinaid()">Submit</button>
+    </form>
+</div>
+
+<div class="question" id="interview">
+    <h1 style="text-align: center">The College Interview</h1>
+    <form id="interviewForm">
+    	<label for="interview_knowledge">My knowledge about college interviews is…</label>
+    	<input type="range" min="1" max="5" name="interview_knowledge" id="interview_knowledge" required>
+    	<label for="interview_confidence">My confidence in my ability to prepare for a college interview is…</label>
+    	<input type="range" min="1" max="5" name="interview_confidence" id="interview_confidence" required>
+    	<button type="button" onclick="submitInterview()">Submit</button>
+    </form>
+</div>
+
+<div class="question" id="college_life">
+    <h1 style="text-align: center">College Life</h1>
+    <form id="lifeForm">
+    	<label for="life_confidence">My confidence in navigating college life is…</label>
+    	<input type="range" min="1" max="5" name="life_confidence" id="life_confidence" required>
+    	<button type="button" onclick="submitLife()">Submit</button>
+    </form>
+</div>
+
+<style>
+.question {
+    margin: 60px 0px;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: #f2f2f2;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	margin: 20px 0px;
+}
+
+label {
+	font-size: 1.2rem;
+	margin-bottom: 10px;
+}
+
+input[type=range] {
+	-webkit-appearance: none;
+	background-color: #ddd;
+	height: 10px;
+	border-radius: 5px;
+	margin-bottom: 20px;
+	width: 100%;
+	outline: none;
+	opacity: 0.7;
+	-webkit-transition: .2s;
+	transition: opacity .2s;
+}
+
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 25px;
+	height: 25px;
+	background-color: #666;
+	cursor: pointer;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+	transform: translateY(-30%);
+}
+
+input[type=range]:hover {
+	opacity: 1;
+}
+
+input[type=range]::-moz-range-thumb {
+	width: 25px;
+	height: 25px;
+	background-color: #666;
+	cursor: pointer;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+input[type=range]::-moz-range-track {
+	background-color: #ddd;
+	height: 10px;
+	border-radius: 5px;
+}
+
+input[type=range]::-moz-focus-outer {
+	border: 0;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+	background-color: #ddd;
+	height: 10px;
+	border-radius: 5px;
+}
+
+input[type=range]::-moz-range-progress {
+	background-color: #666;
+	height: 10px;
+	border-radius: 5px;
+}
+
+input[type=range]::-ms-track {
+	background-color: transparent;
+	border-color: transparent;
+	color: transparent;
+	height: 10px;
+	border-radius: 5px;
+	margin-top: 6px;
+	margin-bottom: 6px;
+	width: 100%;
+	outline: none;
+}
+
+input[type=range]::-ms-fill-lower {
+	background-color: #ddd;
+	border-radius: 5px;
+}
+
+input[type=range]::-ms-fill-upper {
+	background-color: #666;
+	border-radius: 5px;
+}
+
+input[type=range]:focus {
+	outline: none;
+}
+</style>

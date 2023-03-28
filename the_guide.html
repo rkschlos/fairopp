@@ -1,0 +1,66 @@
+<!--buttons to track guide download clicks-->
+
+
+<section class="buttons">
+    <button class="English" href='https://drive.google.com/file/d/1pHbs0rmYnJsQi20HX7haVcgV-kkTCi3o/view?usp=share_link'>English</button>
+    <button class="Spanish" href="https://drive.google.com/file/d/1MJjSHB658LF3IzyTzEEwi2-T24pcqWH4/view?usp=share_link">Español</button>
+    <button class="French" href="https://drive.google.com/file/d/1kpob3UpF07KpEwo2Nun8cPFKhWF5Zhfp/view?usp=share_link">Français</button>
+    <button class="Chinese" href="https://drive.google.com/file/d/1dibzIa2dDVGs7axWCS5QeOY4KCGCumDj/view?usp=share_link">申请指南</button>
+    <button class="Amharic" href="https://drive.google.com/file/d/12BABu7omMCn821VYxa618lkx8HApNVP3/view?usp=share_link">አማርኛ</button>
+    <button class="Arabic" href="https://drive.google.com/file/d/1K54p35Uwu8Nb1q49oLFO2KQpmnISmlMN/view?usp=share_link">عربي</button>
+    <button class="Turkish" href="https://drive.google.com/file/d/1rnKyTebctIT76E6ygL33BAHcCAG9cQjp/view?usp=share_link">Türkçe</button>
+</section>
+
+<style>
+    section {
+    box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    padding-left: 24px;
+    padding-right: 24px;
+    }
+    button {
+      background-color: #ee472f;
+      border-radius: 10px;
+      border: red;
+      color: white;
+      padding: 10px 30px;
+      margin: 5px;
+    }
+    button:hover {
+        background-color: #1ec279;
+    }
+</style>
+
+<script>
+const buttons = document.querySelectorAll('.buttons button');
+const apiUrl = 'https://api.airtable.com/v0/appKUVt8K5fU6BOOJ/GuideTracker';
+const apiToken = 'Bearer pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27';
+
+buttons.forEach((button) => {
+    button.addEventListener('click', (event) => {
+        const language = event.target.className;
+        const url = event.target.getAttribute('href');
+        const currentUser = logged_in_user;
+        const currentUserEmail = currentUser["Email"]
+        
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': apiToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fields: {
+                    'Language': language,
+                    'UserEmail': currentUserEmail
+                }
+            })
+        })
+        
+        event.preventDefault();
+        window.open(url, '_blank');
+    });
+});
+</script>

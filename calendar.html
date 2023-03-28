@@ -1,0 +1,25 @@
+<script>
+const table = new Airpuck.Table({
+    name: "Dates",
+    baseID: "appKUVt8K5fU6BOOJ",
+    apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+}, _ => {
+    const rawRecords = table.records();
+    const cleanRecords = rawRecords.map((el) => ({
+        title: el["fields"]["Name"],
+        start: el["fields"]["Start"],
+        end: el["fields"]["End"],
+    }));
+    var calendarEl = document.getElementById("calendar");
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: "dayGridMonth",
+      eventSources: [
+        {
+            events: cleanRecords,
+        }
+      ]
+    });
+    calendar.render();
+});
+</script>
+<div id="calendar"></div>

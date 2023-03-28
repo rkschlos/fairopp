@@ -1,0 +1,54 @@
+<style>
+  p {font-family: Poppins;}
+  .btn-primary {background-color: #2BB99D;
+      border: none;
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/gh/justKD/AirpuckJS@master/airpuck.min.js"></script>
+<script>
+function checkAirtable() {
+    if (window.logged_in_user["Finished Signup"] == 1) {
+        if (window.logged_in_user["Role"] == "Student") {
+            window.location.href = "student-portal";
+        } else {
+            window.location.href = "volunteer-portal";
+        }
+        return;
+    }
+    const table = new Airpuck.Table({
+        name: "Users",
+        baseID: "appKUVt8K5fU6BOOJ",
+        apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+    }, _ => {
+        const airtableId = window.logged_in_user["airtable_record_id"];
+        const rawRecords = table.records();
+        const record = rawRecords.find(el => el["id"] == airtableId);
+        if (!record || record.fields["Finished Signup"] == 0) {
+            setTimeout(checkAirtable, 1000);
+        } else {
+            if (window.logged_in_user["Role"] == "Student") {
+                window.location.href = "student-portal";
+            } else {
+                window.location.href = "volunteer-portal";
+            }
+        }
+    });
+}
+
+checkAirtable();
+</script>
+<div class="pt-5 d-flex flex-column justify-content-center align-items-center">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <p class="h4 pb-4">
+        Two Seconds!
+    </p>
+    We're loading your account. This page should automatically
+    refresh in just a few seconds.
+    <p class="pt-4">Not refreshing?</p>
+    <div class="btn btn-primary " onclick="window.location.reload()">
+        Refresh Page
+    </div>
+</div>

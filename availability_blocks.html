@@ -1,0 +1,177 @@
+<style>
+form {
+  width: 400px;
+  margin: 0 auto;
+  font-family: Poppins;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+p {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+button[type="button"] {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #29ba9d;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button[type="button"]:hover {
+  background-color: #0062cc;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"]::-moz-number-spin-box {
+  -moz-appearance: textfield;
+}
+
+</style>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/gh/justKD/AirpuckJS@master/airpuck.min.js"></script>
+<script>
+function submitForm() {
+    try {
+      // get all the checkbox inputs
+      const monday = document.getElementsByName('monday')[0].checked ? "Yes" : "No";
+      const tuesday = document.getElementsByName('tuesday')[0].checked ? "Yes" : "No";
+      const wednesday = document.getElementsByName('wednesday')[0].checked ? "Yes" : "No";
+      const thursday = document.getElementsByName('thursday')[0].checked ? "Yes" : "No";
+      const friday = document.getElementsByName('friday')[0].checked ? "Yes" : "No";
+      const saturday = document.getElementsByName('saturday')[0].checked ? "Yes" : "No";
+      const sunday = document.getElementsByName('sunday')[0].checked ? "Yes" : "No";
+      const capacity = document.getElementsByName('num_essays')[0].valueAsNumber;
+      
+      // Check if review capacity question was answered
+      if (isNaN(capacity)) {
+        try {
+          Swal.fire({
+              icon: 'error',
+              title: 'You missed a required question!',
+              text: 'Please tell us how many essays you can review this week!',
+            })
+        } catch {
+            Swal.fire({
+                title: 'Something Went Wrong',
+                text: 'Something went wrong. Please try again, and reach out to support if the problem continues.',
+                icon: 'error',
+            });
+        }
+      }
+      
+      else {
+          const table = new Airpuck.Table({
+            name: "Users",
+            baseID: "appKUVt8K5fU6BOOJ",
+            apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+            }, _ => {
+                const rawRecords = table.records();
+                const user = table.getRecordsByField("Email", window.logged_in_user["Email"])[0];
+                user.fields["Free Monday (Essay Reviewers)"] = monday;
+                user.fields["Free Tuesday (Essay Reviewers)"] = tuesday;
+                user.fields["Free Wednesday (Essay Reviewers)"] = wednesday;
+                user.fields["Free Thursday (Essay Reviewers)"] = thursday;
+                user.fields["Free Friday (Essay Reviewers)"] = friday;
+                user.fields["Free Saturday (Essay Reviewers)"] = saturday;
+                user.fields["Free Sunday (Essay Reviewers)"] = sunday;
+                // Need to set the computed fields to undefined
+                // explicitly
+                user.fields["Mentors Calls Count"] = undefined;
+                user.fields["Students Helped"] = undefined;
+                user.fields["Finished Signup"] = undefined;
+                user.fields["Reviews Assigned"] = undefined;
+                user.fields["Review Capacity (Essay Reviewers)"] = capacity;
+                user.fields["Has Set Availability (Essay Reviewers)"] = true;
+                try {
+                    const res = table.update(user, _ => {
+                        console.log("1")
+                    }, _ => { console.log("test") });
+                        Swal.fire({
+                            title: 'Success!',
+                            text: "You're availability has been set.",
+                            icon: 'success',
+                            didClose: () => { window.location = "reviewer-portal" },
+                        })
+                } catch {
+                    Swal.fire({
+                        title: 'Something Went Wrong',
+                        text: 'Something went wrong. Please try again, and reach out to support if the problem continues.',
+                        icon: 'error',
+                    });
+                }
+            });
+        }
+    } catch {
+        Swal.fire({
+            title: 'Something Went Wrong',
+            text: 'Something went wrong. Please try again, and reach out to support if the problem continues.',
+            icon: 'error',
+        });
+    }
+}
+
+</script>
+
+<form>
+  <h2>Availability</h2>
+  <p>Please select the days this week when you're available to review essays.</p>
+  <label>
+    <input type="checkbox" name="monday">Monday
+  </label>
+  <label>
+    <input type="checkbox" name="tuesday">Tuesday
+  </label>
+  <label>
+    <input type="checkbox" name="wednesday">Wednesday
+  </label>
+  <label>
+    <input type="checkbox" name="thursday">Thursday
+  </label>
+  <label>
+    <input type="checkbox" name="friday">Friday
+  </label>
+  <label>
+    <input type="checkbox" name="saturday">Saturday
+  </label>
+  <label>
+    <input type="checkbox" name="sunday">Sunday
+  </label>
+  <label>
+  How many essays can you review this week?
+  </label>
+  <input type="number" name="num_essays">
+  <button type="button" onclick="submitForm()">Submit</button>
+</form>
