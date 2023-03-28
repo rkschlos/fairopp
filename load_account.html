@@ -18,8 +18,8 @@ function checkAirtable() {
     }
     const table = new Airpuck.Table({
         name: "Users",
-        baseID: "appKUVt8K5fU6BOOJ",
-        apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+        baseID: BASE_ID,
+        apiKey: API_KEY
     }, _ => {
         const airtableId = window.logged_in_user["airtable_record_id"];
         const rawRecords = table.records();

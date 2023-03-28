@@ -88,8 +88,8 @@ async function getMentees() {
     return new Promise(function(resolve, reject) {
         const table = new Airpuck.Table({
             name: "Mentorships",
-            baseID: "appKUVt8K5fU6BOOJ",
-            apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+            baseID: BASE_ID,
+            apiKey: API_KEY
         }, _ => {
             const rows = table.getRecordsByField("Mentor Email", window.logged_in_user["Email"]);
             const result = rows.map((row) => {
