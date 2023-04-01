@@ -25,10 +25,7 @@ a dynamic dropdown option (even in custom forms)
       <label for="time">Time of Call:</label>
       <input type="time" id="time" name="time" required>
     </div>
-    <div class="form-group">
-      <label for="timezone">Time Zone:</label>
-      <input type="datetime-local" id="timezone" name="timezone" required>
-    </div>
+    
     <button type="submit" onclick="submitForm()">Submit</button>
   </form>
 </div>
@@ -88,8 +85,8 @@ async function getMentees() {
     return new Promise(function(resolve, reject) {
         const table = new Airpuck.Table({
             name: "Mentorships",
-            baseID: BASE_ID,
-            apiKey: API_KEY
+            baseID: "appKUVt8K5fU6BOOJ",
+            apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
         }, _ => {
             const rows = table.getRecordsByField("Mentor Email", window.logged_in_user["Email"]);
             const result = rows.map((row) => {
@@ -135,11 +132,40 @@ async function getUserId(usr) {
     });
 }
 
+function getUserTimezone() {
+    // Get the user's time zone offset
+    const timezoneOffset = new Date().getTimezoneOffset();
+
+    // Convert the offset to hours
+    const timezoneOffsetHours = timezoneOffset / 60;
+
+    // Get the user's time zone
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    return timezone;
+}
+
+
+
+
+function getISOstring(date, time, timezone) {
+  const dateTimeString = `${date}T${time}:00.000`;
+  const dateTime = new Date(dateTimeString);
+  const isoDateTime = dateTime.toLocaleString('en-US', { timeZone: timezone, timeZoneName: 'short' });
+  return isoDateTime;
+}
+
+
 async function submitForm() {
     // Get the form values
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
+    console.log(time)
     const mentee = document.getElementById("mentees").value;
+    const timezone = getUserTimezone();
+    const isoDateTime = getISOstring(date, time, timezone);
+    
+    
     
     const callsTable = new Airpuck.Table({
         name: "Mentorship Calls",
@@ -151,6 +177,8 @@ async function submitForm() {
         record.fields["Mentor"] = [window.logged_in_user.airtable_record_id];
         record.fields["Mentee"] = [mentee];
         record.fields["Call Time"] = date + " " + time;
+        record.fields["Timezone"] = timezone;
+        record.fields["isoDateTime"] = isoDateTime;
         callsTable.add(record, () => {
             window.location = "mentor-calls";
         }, (e) => {});
