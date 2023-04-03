@@ -176,9 +176,8 @@ async function submitForm() {
         record.fields = {};
         record.fields["Mentor"] = [window.logged_in_user.airtable_record_id];
         record.fields["Mentee"] = [mentee];
-        record.fields["Call Time"] = date + " " + time;
+        record.fields["Call Time"] = isoDateTime;
         record.fields["Timezone"] = timezone;
-        record.fields["isoDateTime"] = isoDateTime;
         callsTable.add(record, () => {
             window.location = "mentor-calls";
         }, (e) => {});
