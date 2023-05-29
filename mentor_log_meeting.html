@@ -7,9 +7,9 @@ a meeting for. Softr does not allow you to have
 a dynamic dropdown option (even in custom forms)
 -->
 <div class="form-container">
-  <h2>Enter Call Information</h2>
+  <h2>Mentor Report</h2>
   <p>
-  After scheduling a call with your mentor via Google Cal, please record information about the call below.
+  After completing a session with your mentee, please complete the basic information about the session below.
 
   </p>
   <form>
@@ -27,34 +27,88 @@ a dynamic dropdown option (even in custom forms)
       <input type="time" id="time" name="time" required>
     </div>
     <div class="form-group">
-      <label for="call-type">Call Type:</label>
-      <select id="call-type" name="call-type" required>
-        <option value="Pre-Mentoring Questionnaire">Pre-Mentoring Questionnaire</option>
-        <option value="Connecting">Connecting</option>
-        <option value="Creating a College List">Creating a College List</option>
-        <option value="College Application Timeline">College Application Timeline</option>
-        <option value="Standardized Tests">Standardized Tests</option>
-        <option value="College Essays">College Essays</option>
-        <option value="Letters of Recommendation">Letters of Recommendation</option>
-        <option value="Financial Aid/Scholarships">Financial Aid/Scholarships</option>
-        <option value="Interviews & Post-Submission">Interviews & Post-Submission</option>
-        <option value="Preparation for College Life">Preparation for College Life</option>
-        <option value="Making a College Decision">Making a College Decision</option>
-        <option value="Post-Mentoring Questionnaire">Post-Mentoring Questionnaire</option>
-      </select>
-    </div>
-    <div class="form-group">
       <label for="session-activities">Session Activities:</label>
-      <input type="text-area" id="session-activities" name="session-activities" required>
+      <input type="textarea" id="session-activities" name="session-activities" required>
     </div>
     <div class="form-group">
       <label for="homework-assigned">Homework Assigned:</label>
-      <input type="text-area" id="homework-assigned" name="homework-assigned" required>
+      <input type="textarea" id="homework-assigned" name="homework-assigned" required>
     </div>
-    
+    <div class="form-group">
+      <label for="reflections">Thoughts and Reflections:</label>
+      <input type="textarea" id="reflections" name="reflections" required>
+    </div>
+    <div class="form-group">
+  <label>Call Type:</label>
+  <div>
+    <label for="connecting-checkbox">
+      <input type="checkbox" id="connecting-checkbox" name="call-type[]" value="Connecting">
+      Connecting
+    </label>
+  </div>
+  <div>
+    <label for="college-list-checkbox">
+      <input type="checkbox" id="college-list-checkbox" name="call-type[]" value="Creating a College List">
+      Creating a College List
+    </label>
+  </div>
+  <div>
+    <label for="app-timeline-checkbox">
+      <input type="checkbox" id="app-timeline-checkbox" name="call-type[]" value="College Application Timeline">
+      College Application Timeline
+    </label>
+  </div>
+  <div>
+    <label for="std-tests-checkbox">
+      <input type="checkbox" id="std-tests-checkbox" name="call-type[]" value="Standardized Tests">
+      Standardized Tests
+    </label>
+  </div>
+  <div>
+    <label for="college-essays-checkbox">
+      <input type="checkbox" id="college-essays-checkbox" name="call-type[]" value="College Essays">
+      College Essays
+    </label>
+  </div>
+  <div>
+    <label for="rec-letters-checkbox">
+      <input type="checkbox" id="rec-letters-checkbox" name="call-type[]" value="Letters of Recommendation">
+      Letters of Recommendation
+    </label>
+  </div>
+  <div>
+    <label for="financial-aid-checkbox">
+      <input type="checkbox" id="financial-aid-checkbox" name="call-type[]" value="Financial Aid/Scholarships">
+      Financial Aid/Scholarships
+    </label>
+  </div>
+  <div>
+    <label for="interviews-checkbox">
+      <input type="checkbox" id="interviews-checkbox" name="call-type[]" value="Interviews &amp; Post-Submission">
+      Interviews &amp; Post-Submission
+    </label>
+  </div>
+  <div>
+    <label for="prep-college-life-checkbox">
+      <input type="checkbox" id="prep-college-life-checkbox" name="call-type[]" value="Preparation for College Life">
+      Preparation for College Life
+    </label>
+  </div>
+  <div>
+    <label for="college-decision-checkbox">
+      <input type="checkbox" id="college-decision-checkbox" name="call-type[]" value="Making a College Decision">
+      Making a College Decision
+    </label>
+  </div>
+</div>
+    </form>
     <button type="submit" onclick="submitForm()">Submit</button>
   </form>
 </div>
+
+
+
+
 <style>
 
 p {font-family: Poppins;}
@@ -111,8 +165,8 @@ async function getMentees() {
     return new Promise(function(resolve, reject) {
         const table = new Airpuck.Table({
             name: "Mentorships",
-            baseID: BASE_ID,
-            apiKey: API_KEY
+            baseID: "appKUVt8K5fU6BOOJ",
+            apiKey: "patF8kwvdOjo8Hhf2.45eb2a62ff900ffa14599eb5bd57d59a36cb2b4470800a0f182eb423c4f3ac14"
         }, _ => {
             const rows = table.getRecordsByField("Mentor Email", window.logged_in_user["Email"]);
             const result = rows.map((row) => {
@@ -150,7 +204,7 @@ async function getUserId(usr) {
         const usersTable = new Airpuck.Table({
         name: "Users",
         baseID: "appKUVt8K5fU6BOOJ",
-        apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+        apiKey: "patF8kwvdOjo8Hhf2.45eb2a62ff900ffa14599eb5bd57d59a36cb2b4470800a0f182eb423c4f3ac14"
         }, _ => {
             const user = usersTable.getRecordsByField("Email", usr)[0];
             resolve(user.id);
@@ -159,19 +213,12 @@ async function getUserId(usr) {
 }
 
 function getUserTimezone() {
-    // Get the user's time zone offset
+    // Get the user's time zone offset and return their timezone
     const timezoneOffset = new Date().getTimezoneOffset();
-
-    // Convert the offset to hours
     const timezoneOffsetHours = timezoneOffset / 60;
-
-    // Get the user's time zone
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
     return timezone;
 }
-
-
 
 
 function getISOstring(date, time, timezone) {
@@ -186,32 +233,42 @@ async function submitForm() {
     // Get the form values
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
-    console.log(time)
     const mentee = document.getElementById("mentees").value;
     const timezone = getUserTimezone();
     const isoDateTime = getISOstring(date, time, timezone);
-    const callType = document.getElementById("call-type").value;
     const sessionActivities = document.getElementById("session-activities").value;
     const homeworkAssigned = document.getElementById("homework-assigned").value;
-    
+    const reflections = document.getElementById("reflections").value;
+    const checkboxes = document.getElementsByName("call-type[]");
+    const checkedCheckboxes = [];
+
+    for (let i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            checkedCheckboxes.push(checkboxes[i].value);
+        }
+    }
+
+    const callType = checkedCheckboxes;
     
     
     
     const callsTable = new Airpuck.Table({
         name: "Mentorship Calls",
         baseID: "appKUVt8K5fU6BOOJ",
-        apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+        apiKey: "patF8kwvdOjo8Hhf2.45eb2a62ff900ffa14599eb5bd57d59a36cb2b4470800a0f182eb423c4f3ac14"
     }, _ => {
         const record = new callsTable.record();
         record.fields = {};
         record.fields["Mentor"] = [window.logged_in_user.airtable_record_id];
         record.fields["Mentee"] = [mentee];
         record.fields["Call Time"] = isoDateTime;
-        record.fields["Initial call type"] = callType;
+        record.fields["Call Date"] = date;
+        record.fields["Call Type"] = callType;
         record.fields["Session Activities"] = sessionActivities;
         record.fields["Homework Assigned"] = homeworkAssigned;
-        
+        record.fields["Reflections"] = reflections;
         record.fields["Timezone"] = timezone;
+        
         callsTable.add(record, () => {
             window.location = "mentor-calls";
         }, (e) => {});
@@ -220,7 +277,3 @@ async function submitForm() {
 }
 
 </script>
-
-
-
-    
