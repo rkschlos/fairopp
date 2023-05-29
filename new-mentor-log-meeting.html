@@ -9,7 +9,8 @@ a dynamic dropdown option (even in custom forms)
 <div class="form-container">
   <h2>Enter Call Information</h2>
   <p>
-  Use this form to record a past or upcoming call with one of your mentees. This helps us help you stay on track with your mentees progress and check-in along the way.
+  After scheduling a call with your mentor via Google Cal, please record information about the call below.
+
   </p>
   <form>
     <div class="form-group">
@@ -24,6 +25,31 @@ a dynamic dropdown option (even in custom forms)
     <div class="form-group">
       <label for="time">Time of Call:</label>
       <input type="time" id="time" name="time" required>
+    </div>
+    <div class="form-group">
+      <label for="call-type">Call Type:</label>
+      <select id="call-type" name="call-type" required>
+        <option value="Pre-Mentoring Questionnaire">Pre-Mentoring Questionnaire</option>
+        <option value="Connecting">Connecting</option>
+        <option value="Creating a College List">Creating a College List</option>
+        <option value="College Application Timeline">College Application Timeline</option>
+        <option value="Standardized Tests">Standardized Tests</option>
+        <option value="College Essays">College Essays</option>
+        <option value="Letters of Recommendation">Letters of Recommendation</option>
+        <option value="Financial Aid/Scholarships">Financial Aid/Scholarships</option>
+        <option value="Interviews & Post-Submission">Interviews & Post-Submission</option>
+        <option value="Preparation for College Life">Preparation for College Life</option>
+        <option value="Making a College Decision">Making a College Decision</option>
+        <option value="Post-Mentoring Questionnaire">Post-Mentoring Questionnaire</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="session-activities">Session Activities:</label>
+      <input type="text-area" id="session-activities" name="session-activities" required>
+    </div>
+    <div class="form-group">
+      <label for="homework-assigned">Homework Assigned:</label>
+      <input type="text-area" id="homework-assigned" name="homework-assigned" required>
     </div>
     
     <button type="submit" onclick="submitForm()">Submit</button>
@@ -85,8 +111,8 @@ async function getMentees() {
     return new Promise(function(resolve, reject) {
         const table = new Airpuck.Table({
             name: "Mentorships",
-            baseID: "appKUVt8K5fU6BOOJ",
-            apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
+            baseID: BASE_ID,
+            apiKey: API_KEY
         }, _ => {
             const rows = table.getRecordsByField("Mentor Email", window.logged_in_user["Email"]);
             const result = rows.map((row) => {
@@ -123,8 +149,8 @@ async function getUserId(usr) {
     return new Promise((resolve, reject) => {
         const usersTable = new Airpuck.Table({
         name: "Users",
-        baseID: BASE_ID,
-        apiKey: API_KEY,
+        baseID: "appKUVt8K5fU6BOOJ",
+        apiKey: "pat8hGmchfWiq8HXf.14a1ab90542639e1741aa223517937a0f5edda7ea54e82700193a2b65aa7ce27"
         }, _ => {
             const user = usersTable.getRecordsByField("Email", usr)[0];
             resolve(user.id);
@@ -164,6 +190,10 @@ async function submitForm() {
     const mentee = document.getElementById("mentees").value;
     const timezone = getUserTimezone();
     const isoDateTime = getISOstring(date, time, timezone);
+    const callType = document.getElementById("call-type").value;
+    const sessionActivities = document.getElementById("session-activities").value;
+    const homeworkAssigned = document.getElementById("homework-assigned").value;
+    
     
     
     
@@ -177,6 +207,10 @@ async function submitForm() {
         record.fields["Mentor"] = [window.logged_in_user.airtable_record_id];
         record.fields["Mentee"] = [mentee];
         record.fields["Call Time"] = isoDateTime;
+        record.fields["Initial call type"] = callType;
+        record.fields["Session Activities"] = sessionActivities;
+        record.fields["Homework Assigned"] = homeworkAssigned;
+        
         record.fields["Timezone"] = timezone;
         callsTable.add(record, () => {
             window.location = "mentor-calls";
@@ -186,3 +220,7 @@ async function submitForm() {
 }
 
 </script>
+
+
+
+    
